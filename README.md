@@ -1,5 +1,4 @@
-# SmartReminder
-# SmartReminder ⏰
+# SmartReminder 
 
 SmartReminder is a lightweight task and reminder web application that allows users to create tasks with a **date, time, and priority**, and receive **browser notifications** at the scheduled moment.
 
