@@ -1,13 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from database import SessionLocal, engine
-from models import Task
-from database import Base
-
-Base.metadata.create_all(bind=engine)
+from pydantic import BaseModel
+from typing import List
 
 app = FastAPI()
 
+# Allow frontend to talk to backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,22 +13,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+class Task(BaseModel):
+    id: int
+    text: str
+    date: str
+    time: str
+    priority: str
+
+tasks: List[Task] = []  # in-memory storage
+
 @app.get("/tasks")
 def get_tasks():
-    db = SessionLocal()
-    return db.query(Task).all()
+    return tasks
 
 @app.post("/tasks")
-def create_task(task: dict):
-    db = SessionLocal()
-    new_task = Task(**task)
-    db.add(new_task)
-    db.commit()
-    return new_task
-
-@app.delete("/tasks/{task_id}")
-def delete_task(task_id: int):
-    db = SessionLocal()
-    task = db.query(Task).get(task_id)
-    db.delete(task)
-    db.commit()
+def add_task(task: Task):
+    tasks.append(task)
+    return task

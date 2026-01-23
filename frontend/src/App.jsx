@@ -8,12 +8,12 @@ function App() {
   const [priority, setPriority] = useState("low");
   const [tasks, setTasks] = useState([]);
 
-  // Ask for notification permission once
   useEffect(() => {
-    if ("Notification" in window) {
-      Notification.requestPermission();
-    }
+    fetch("http://localhost:8000/tasks")
+      .then((res) => res.json())
+      .then((data) => setTasks(data));
   }, []);
+
 
   const scheduleNotification = (task) => {
     if (Notification.permission !== "granted") return;
@@ -30,7 +30,7 @@ function App() {
     }, delay);
   };
 
-  const addTask = () => {
+  const addTask = async () => {
     if (!taskText || !date || !time) return;
 
     const newTask = {
@@ -41,13 +41,13 @@ function App() {
       priority,
     };
 
-    setTasks([...tasks, newTask]);
-    scheduleNotification(newTask);
+    await fetch("http://localhost:8000/tasks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newTask),
+    });
 
-    setTaskText("");
-    setDate("");
-    setTime("");
-    setPriority("low");
+    setTasks([...tasks, newTask]);
   };
 
   return (
@@ -72,14 +72,13 @@ function App() {
         value={time}
         onChange={(e) => setTime(e.target.value)}
       />
-
       <select
         value={priority}
         onChange={(e) => setPriority(e.target.value)}
       >
-        <option value="low">Not Urgent</option>
+        <option value="low">Low</option>
         <option value="medium">Medium</option>
-        <option value="high">Urgent</option>
+        <option value="high">High</option>
       </select>
 
       <button onClick={addTask}>Add Reminder</button>

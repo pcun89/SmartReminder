@@ -15,7 +15,7 @@ body {
 }
 
 .app-container {
-    background: white;
+    background: rgb(50, 45, 45);
     padding: 2rem;
     width: 100%;
     max-width: 420px;
@@ -53,13 +53,13 @@ button:hover {
 }
 
 .task.low {
-    background: #e8f5e9;
+    background: #00ff15;
 }
 
 .task.medium {
-    background: #e3f2fd;
+    background: #fbff00;
 }
 
 .task.high {
-    background: #fdecea;
+    background: #ff1900;
 }
