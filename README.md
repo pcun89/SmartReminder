@@ -33,64 +33,106 @@ Smart Reminder is a full-stack web application that allows users to create, prio
 
 ---
 
-## 📂 Project Structure
+## 📁 Project Structure
 
+```
 SmartReminder/
+│
 ├── frontend/
-│ ├── src/
-│ ├── public/
-│ └── package.json
-├── backend/
-│ ├── server.js
-│ └── package.json
-└── README.md
-
-
+│   ├── src/
+│   │   ├── App.jsx
+│   │   ├── styles.css
+│   │   └── main.jsx
+│   └── index.html
+│
+└── backend/   (future use)
+```
 
 ---
 
 ## ⚙️ Installation & Setup
 
-### Frontend
-#```bash
-#cd frontend
-#npm install
-#npm run dev
-#Backend
-#bash
-#Copy code
-#cd backend
-#npm install
-#node server.js
-#The backend will run on:
+### 1️⃣ Clone the Repository
 
-#arduino
-#Copy code
-#http://localhost:8000
-#🔗 API Endpoints
-#Method	Endpoint	Description
-#GET	/tasks	Fetch all tasks
-#POST	/tasks	Create a new task
-#PUT	/tasks/:id	Update a task
-#DELETE	/tasks/:id	Delete a task
+```bash
+git clone https://github.com/your-username/SmartReminder.git
+cd SmartReminder/frontend
+```
 
-#🌐 Live Demo
-#(Add once deployed)
+### 2️⃣ Install Dependencies
 
-#arduino
+```bash
+npm install
+```
 
-#https://pcun89.github.io/SmartReminder/
-#📌 Future Improvements
-#User authentication
+### 3️⃣ Run the App
 
-#Push or email notifications
+```bash
+npm run dev
+```
 
-#Task filtering and search
+Open your browser and go to:
 
-#Database integration (MongoDB or PostgreSQL)
+```
+http://localhost:5173
+```
 
-#👨‍💻 Author
-#Phillipp Cun
-#Bachelor of Arts in Computer Science
-#Portfolio: https://phillippcun.dev
-#GitHub: https://github.com/pcun89
+---
+
+## 🔔 Notifications
+
+* The app will request notification permission on first load
+* Notifications are scheduled using `setTimeout`
+* **The browser must remain open** for notifications to trigger
+* HTTPS is required for notifications when deployed
+
+---
+
+## 🧠 Data Structure
+
+Tasks are stored as an array of objects:
+
+```js
+{
+  id: number,
+  text: string,
+  date: string,
+  time: string,
+  priority: string
+}
+```
+
+---
+
+## ⏱ Time Complexity
+
+* Add Task: **O(1)**
+* Render Tasks: **O(n)**
+* Schedule Notification: **O(1)** per task
+
+---
+
+## 🧪 Known Limitations
+
+* Notifications stop if the browser is closed
+* Tasks are not persisted after refresh (localStorage planned)
+* No user authentication yet
+
+---
+
+## 🔮 Future Enhancements
+
+* Save tasks using `localStorage`
+* Edit and delete reminders
+* Backend with FastAPI for background notifications
+* Email and SMS notifications
+* Calendar view
+* User authentication
+
+---
+
+## 👨‍💻 Author
+
+**Phillipp Cun**
+Computer Science Graduate
+Passionate about full-stack development and building practical tools
