@@ -1,148 +1,96 @@
-# SmartReminder 
+# Smart Reminder
 
-SmartReminder is a lightweight task and reminder web application that allows users to create tasks with a **date, time, and priority**, and receive **browser notifications** at the scheduled moment.
-
-This project is designed to be simple, fast, and beginner-friendly while demonstrating core full-stack concepts.
+Smart Reminder is a full-stack web application that allows users to create, prioritize, and manage reminders with scheduled notification times. The application supports multiple urgency levels and persists data through a backend API, demonstrating full-stack development concepts.
 
 ---
 
 ## 🚀 Features
 
-* Add reminders with:
-
-  * Task name
-  * Due date
-  * Due time
-  * Priority (Low / Medium / High)
-* Browser notifications using the Web Notifications API
-* Clean and responsive UI
-* Built with modern React (Vite)
-* No backend required (yet)
+- Create, update, and delete reminders
+- Assign urgency levels: **Low, Medium, High**
+- Schedule notification times for reminders
+- Persist tasks using a backend REST API
+- Responsive and user-friendly interface
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
+- React
+- JavaScript (ES6+)
+- CSS
+- Vite
 
-* React (Vite)
-* JavaScript (ES6+)
-* CSS
-* Web Notifications API
+### Backend
+- Node.js
+- Express.js
+- RESTful API
 
-### Backend (Planned)
-
-* FastAPI
-* SQLite / PostgreSQL
+### Deployment
+- Frontend: GitHub Pages
+- Backend: Hosted separately (e.g., Render / Railway)
 
 ---
 
-## 📁 Project Structure
+## 📂 Project Structure
 
-```
 SmartReminder/
-│
 ├── frontend/
-│   ├── src/
-│   │   ├── App.jsx
-│   │   ├── styles.css
-│   │   └── main.jsx
-│   └── index.html
-│
-└── backend/   (future use)
-```
+│ ├── src/
+│ ├── public/
+│ └── package.json
+├── backend/
+│ ├── server.js
+│ └── package.json
+└── README.md
+
+
 
 ---
 
 ## ⚙️ Installation & Setup
 
-### 1️⃣ Clone the Repository
+### Frontend
+#```bash
+#cd frontend
+#npm install
+#npm run dev
+#Backend
+#bash
+#Copy code
+#cd backend
+#npm install
+#node server.js
+#The backend will run on:
 
-```bash
-git clone https://github.com/your-username/SmartReminder.git
-cd SmartReminder/frontend
-```
+#arduino
+#Copy code
+#http://localhost:8000
+#🔗 API Endpoints
+#Method	Endpoint	Description
+#GET	/tasks	Fetch all tasks
+#POST	/tasks	Create a new task
+#PUT	/tasks/:id	Update a task
+#DELETE	/tasks/:id	Delete a task
 
-### 2️⃣ Install Dependencies
+#🌐 Live Demo
+#(Add once deployed)
 
-```bash
-npm install
-```
+#arduino
 
-### 3️⃣ Run the App
+#https://pcun89.github.io/SmartReminder/
+#📌 Future Improvements
+#User authentication
 
-```bash
-npm run dev
-```
+#Push or email notifications
 
-Open your browser and go to:
+#Task filtering and search
 
-```
-http://localhost:5173
-```
+#Database integration (MongoDB or PostgreSQL)
 
----
-
-## 🔔 Notifications
-
-* The app will request notification permission on first load
-* Notifications are scheduled using `setTimeout`
-* **The browser must remain open** for notifications to trigger
-* HTTPS is required for notifications when deployed
-
----
-
-## 🧠 Data Structure
-
-Tasks are stored as an array of objects:
-
-```js
-{
-  id: number,
-  text: string,
-  date: string,
-  time: string,
-  priority: string
-}
-```
-
----
-
-## ⏱ Time Complexity
-
-* Add Task: **O(1)**
-* Render Tasks: **O(n)**
-* Schedule Notification: **O(1)** per task
-
----
-
-## 🧪 Known Limitations
-
-* Notifications stop if the browser is closed
-* Tasks are not persisted after refresh (localStorage planned)
-* No user authentication yet
-
----
-
-## 🔮 Future Enhancements
-
-* Save tasks using `localStorage`
-* Edit and delete reminders
-* Backend with FastAPI for background notifications
-* Email and SMS notifications
-* Calendar view
-* User authentication
-
----
-
-## 👨‍💻 Author
-
-**Phillipp Cun**
-Computer Science Graduate
-Passionate about full-stack development and building practical tools
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
+#👨‍💻 Author
+#Phillipp Cun
+#Bachelor of Arts in Computer Science
+#Portfolio: https://phillippcun.dev
+#GitHub: https://github.com/pcun89
