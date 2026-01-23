@@ -8,6 +8,7 @@ function App() {
   const [priority, setPriority] = useState("low");
   const [tasks, setTasks] = useState([]);
 
+  // Ask for notification permission once
   useEffect(() => {
     if ("Notification" in window) {
       Notification.requestPermission();
@@ -17,8 +18,8 @@ function App() {
   const scheduleNotification = (task) => {
     if (Notification.permission !== "granted") return;
 
-    const targetTime = new Date(`${task.date}T${task.time}`);
-    const delay = targetTime.getTime() - Date.now();
+    const notificationTime = new Date(`${task.date}T${task.time}`);
+    const delay = notificationTime.getTime() - Date.now();
 
     if (delay <= 0) return;
 
@@ -55,7 +56,7 @@ function App() {
 
       <input
         type="text"
-        placeholder="Task"
+        placeholder="Task name"
         value={taskText}
         onChange={(e) => setTaskText(e.target.value)}
       />
@@ -76,20 +77,18 @@ function App() {
         value={priority}
         onChange={(e) => setPriority(e.target.value)}
       >
-        <option value="low">Low</option>
+        <option value="low">Not Urgent</option>
         <option value="medium">Medium</option>
-        <option value="high">High</option>
+        <option value="high">Urgent</option>
       </select>
 
       <button onClick={addTask}>Add Reminder</button>
 
       {tasks.map((task) => (
         <div key={task.id} className={`task ${task.priority}`}>
+          <strong>{task.text}</strong>
           <div>
-            <strong>{task.text}</strong>
-            <div>
-              {task.date} at {task.time}
-            </div>
+            {task.date} at {task.time}
           </div>
         </div>
       ))}
