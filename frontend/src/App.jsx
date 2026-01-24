@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Calendar from "./Calendar";
 import "./styles.css";
+const API_BASE = "https://smartreminder-fe46.onrender.com";
 
 function App() {
   // --------------------
@@ -25,7 +26,7 @@ function App() {
   // LOAD TASKS FROM BACKEND
   // --------------------
   useEffect(() => {
-    fetch("http://localhost:8000/tasks")
+    fetch(`${API_BASE}/tasks`)
       .then((res) => res.json())
       .then((data) => {
         setTasks(data);
@@ -73,7 +74,7 @@ function App() {
 
     // Backend
     try {
-      await fetch("http://localhost:8000/tasks", {
+      await fetch(`${API_BASE}/tasks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newTask),
