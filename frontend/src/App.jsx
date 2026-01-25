@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import Calendar from "./Calendar";
 import "./styles.css";
-const API_BASE = "https://smartreminder-fe46.onrender.com";
+const API_BASE = import.meta.env.VITE_API_BASE;
+
 
 function App() {
   // --------------------
@@ -27,7 +28,10 @@ function App() {
   // --------------------
   useEffect(() => {
     fetch(`${API_BASE}/tasks`)
-      .then((res) => res.json())
+      .then(async (res) => {
+        if (!res.ok) throw new Error("API error");
+        return res.json();
+      })
       .then((data) => {
         setTasks(data);
         data.forEach(scheduleNotification);
@@ -46,17 +50,26 @@ function App() {
   const scheduleNotification = (task) => {
     if (Notification.permission !== "granted") return;
 
+    // ❗ Prevent duplicate notifications after refresh
+    if (task.notified) return;
+
     const notifyAt = new Date(`${task.date}T${task.time}`);
     const delay = notifyAt.getTime() - Date.now();
 
     if (delay <= 0) return;
 
-    setTimeout(() => {
+    setTimeout(async () => {
       new Notification("⏰ SmartReminder", {
         body: `${task.text} (${task.priority.toUpperCase()})`,
       });
+
+      await fetch(`${API_BASE}/tasks/${task.id}/notified`, {
+        method: "PUT",
+      });
     }, delay);
+
   };
+
 
   // --------------------
   // ADD TASK
@@ -64,32 +77,36 @@ function App() {
   const addTask = async () => {
     if (!taskText || !date || !time) return;
 
+    // ✅ Backend will generate ID
     const newTask = {
-      id: Date.now(),
       text: taskText,
       date,
       time,
       priority,
     };
 
-    // Backend
     try {
-      await fetch(`${API_BASE}/tasks`, {
+      const res = await fetch(`${API_BASE}/tasks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newTask),
       });
-    } catch { }
 
-    // State
-    setTasks((prev) => [...prev, newTask]);
+      if (!res.ok) throw new Error("Failed to add task");
 
-    // Local storage
-    const stored = JSON.parse(localStorage.getItem("tasks") || "[]");
-    localStorage.setItem("tasks", JSON.stringify([...stored, newTask]));
+      const savedTask = await res.json();
 
-    // Notification
-    scheduleNotification(newTask);
+      // ✅ Use backend-generated task (with ID)
+      setTasks((prev) => [...prev, savedTask]);
+
+      scheduleNotification(savedTask);
+
+      // Optional localStorage backup
+      const stored = JSON.parse(localStorage.getItem("tasks") || "[]");
+      localStorage.setItem("tasks", JSON.stringify([...stored, savedTask]));
+    } catch (err) {
+      console.error(err);
+    }
 
     // Reset form
     setTaskText("");
@@ -98,12 +115,13 @@ function App() {
     setPriority("low");
   };
 
+
   // --------------------
   // DELETE TASK
   // --------------------
   const deleteTask = async (id) => {
     try {
-      await fetch(`http://localhost:8000/tasks/${id}`, {
+      await fetch(`${API_BASE}/tasks/${id}`, {
         method: "DELETE",
       });
     } catch { }
@@ -123,7 +141,7 @@ function App() {
     const updatedTask = { ...task, text: newText };
 
     try {
-      await fetch(`http://localhost:8000/tasks/${task.id}`, {
+      await fetch(`${API_BASE}/tasks/${task.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedTask),

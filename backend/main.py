@@ -48,3 +48,14 @@ def delete_task(task_id: int):
     global tasks
     tasks = [t for t in tasks if t["id"] != task_id]
     return {"status": "deleted"}
+
+
+@app.put("/tasks/{task_id}/notified")
+def mark_notified(task_id: int, db: Session = Depends(get_db)):
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    task.notified = True
+    db.commit()
+    return {"status": "ok"}

@@ -1,4 +1,4 @@
-export default function Calendar({ tasks }) {
+export default function Calendar({ tasks = [] }) {
     const days = [...new Set(tasks.map(t => t.date))];
 
     return (
