@@ -3,17 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-
-@app.get("/")
-def root():
-    return {
-        "message": "SmartReminder API is running",
-        "docs": "/docs"
-    }
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # later restrict
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -21,6 +13,13 @@ app.add_middleware(
 
 tasks = []
 
+
+@app.get("/")
+def root():
+    return {
+        "message": "SmartReminder API is running",
+        "docs": "/docs"
+    }
 
 
 @app.get("/tasks")
@@ -48,14 +47,3 @@ def delete_task(task_id: int):
     global tasks
     tasks = [t for t in tasks if t["id"] != task_id]
     return {"status": "deleted"}
-
-
-@app.put("/tasks/{task_id}/notified")
-def mark_notified(task_id: int, db: Session = Depends(get_db)):
-    task = db.query(Task).filter(Task.id == task_id).first()
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-
-    task.notified = True
-    db.commit()
-    return {"status": "ok"}
