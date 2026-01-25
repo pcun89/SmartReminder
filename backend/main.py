@@ -3,6 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+
+@app.get("/")
+def root():
+    return {
+        "message": "SmartReminder API is running",
+        "docs": "/docs"
+    }
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # later restrict
@@ -13,13 +21,6 @@ app.add_middleware(
 
 tasks = []
 
-
-@app.get("/")
-def root():
-    return {
-        "message": "SmartReminder API is running",
-        "docs": "/docs"
-    }
 
 
 @app.get("/tasks")
