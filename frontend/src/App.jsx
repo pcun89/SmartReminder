@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import Calendar from "./Calendar";
 import "./styles.css";
-const API_BASE = import.meta.env.VITE_API_BASE;
 
+const API_BASE = import.meta.env.VITE_API_BASE;
 
 function App() {
   // --------------------
@@ -36,11 +36,8 @@ function App() {
         setTasks(data);
         data.forEach(scheduleNotification);
       })
-      .catch(() => {
-        // fallback to local storage if backend is down
-        const stored = JSON.parse(localStorage.getItem("tasks") || "[]");
-        setTasks(stored);
-        stored.forEach(scheduleNotification);
+      .catch((err) => {
+        console.error("Failed to load tasks:", err);
       });
   }, []);
 
@@ -49,8 +46,6 @@ function App() {
   // --------------------
   const scheduleNotification = (task) => {
     if (Notification.permission !== "granted") return;
-
-    // ❗ Prevent duplicate notifications after refresh
     if (task.notified) return;
 
     const notifyAt = new Date(`${task.date}T${task.time}`);
@@ -63,13 +58,13 @@ function App() {
         body: `${task.text} (${task.priority.toUpperCase()})`,
       });
 
-      await fetch(`${API_BASE}/tasks/${task.id}/notified`, {
-        method: "PUT",
-      });
+      try {
+        await fetch(`${API_BASE}/tasks/${task.id}/notified`, {
+          method: "PUT",
+        });
+      } catch { }
     }, delay);
-
   };
-
 
   // --------------------
   // ADD TASK
@@ -77,7 +72,6 @@ function App() {
   const addTask = async () => {
     if (!taskText || !date || !time) return;
 
-    // ✅ Backend will generate ID
     const newTask = {
       text: taskText,
       date,
@@ -96,25 +90,17 @@ function App() {
 
       const savedTask = await res.json();
 
-      // ✅ Use backend-generated task (with ID)
       setTasks((prev) => [...prev, savedTask]);
-
       scheduleNotification(savedTask);
-
-      // Optional localStorage backup
-      const stored = JSON.parse(localStorage.getItem("tasks") || "[]");
-      localStorage.setItem("tasks", JSON.stringify([...stored, savedTask]));
     } catch (err) {
       console.error(err);
     }
 
-    // Reset form
     setTaskText("");
     setDate("");
     setTime("");
     setPriority("low");
   };
-
 
   // --------------------
   // DELETE TASK
@@ -126,9 +112,7 @@ function App() {
       });
     } catch { }
 
-    const updated = tasks.filter((task) => task.id !== id);
-    setTasks(updated);
-    localStorage.setItem("tasks", JSON.stringify(updated));
+    setTasks((prev) => prev.filter((task) => task.id !== id));
   };
 
   // --------------------
@@ -148,12 +132,9 @@ function App() {
       });
     } catch { }
 
-    const updatedTasks = tasks.map((t) =>
-      t.id === task.id ? updatedTask : t
+    setTasks((prev) =>
+      prev.map((t) => (t.id === task.id ? updatedTask : t))
     );
-
-    setTasks(updatedTasks);
-    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
   };
 
   // --------------------
@@ -211,11 +192,9 @@ function App() {
         ))}
       </div>
 
-      {/* Calendar View */}
       <Calendar tasks={tasks} />
     </div>
   );
 }
 
 export default App;
-
