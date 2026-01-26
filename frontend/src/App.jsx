@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import Calendar from "./Calendar";
-import EditModal from "./EditModal";
 import "./styles.css";
 
 const API_BASE = import.meta.env.VITE_API_BASE;
@@ -11,71 +10,97 @@ function App() {
   const [time, setTime] = useState("");
   const [priority, setPriority] = useState("low");
   const [tasks, setTasks] = useState([]);
-  const [editingTask, setEditingTask] = useState(null);
 
-  // --------------------
-  // Notification permission
-  // --------------------
+  // ---------------------------------
+  // REQUEST NOTIFICATION PERMISSION
+  // ---------------------------------
   useEffect(() => {
-    if ("Notification" in window && Notification.permission !== "granted") {
+    if ("Notification" in window) {
       Notification.requestPermission();
     }
   }, []);
 
-  // --------------------
-  // Load tasks
-  // --------------------
+  // ---------------------------------
+  // LOAD TASKS
+  // ---------------------------------
   useEffect(() => {
     fetch(`${API_BASE}/tasks`)
-      .then(res => {
+      .then(async (res) => {
         if (!res.ok) throw new Error("API error");
         return res.json();
       })
-      .then(data => {
-        setTasks(data);
-        data.forEach(scheduleNotification);
-      })
-      .catch(err => console.error(err));
+      .then(setTasks)
+      .catch((err) => console.error(err));
   }, []);
 
-  // --------------------
-  // Notification logic
-  // --------------------
-  const scheduleNotification = (task) => {
-    if (Notification.permission !== "granted") return;
-    if (task.notified) return;
+  // ---------------------------------
+  // CHECK REMINDERS EVERY 30 SECONDS
+  // ---------------------------------
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
 
-    const notifyAt = new Date(`${task.date}T${task.time}`);
-    const delay = notifyAt.getTime() - Date.now();
-    if (delay <= 0) return;
+      tasks.forEach((task) => {
+        if (task.notified) return;
 
-    setTimeout(async () => {
-      new Notification("⏰ SmartReminder", {
-        body: `${task.text} (${task.priority.toUpperCase()})`,
+        const notifyAt = new Date(`${task.date}T${task.time}`).getTime();
+
+        if (notifyAt <= now) {
+          fireNotification(task);
+        }
       });
+    }, 30000); // 30s
 
-      // Auto-delete after notify
-      await deleteTask(task.id, false);
-    }, delay);
+    return () => clearInterval(interval);
+  }, [tasks]);
+
+  // ---------------------------------
+  // FIRE NOTIFICATION + AUTO DELETE
+  // ---------------------------------
+  const fireNotification = async (task) => {
+    if (Notification.permission !== "granted") return;
+
+    new Notification("⏰ SmartReminder", {
+      body: `${task.text} (${task.priority.toUpperCase()})`,
+    });
+
+    // mark notified in backend
+    try {
+      await fetch(`${API_BASE}/tasks/${task.id}/notified`, {
+        method: "PUT",
+      });
+    } catch { }
+
+    // auto delete after notify
+    deleteTask(task.id);
   };
 
-  // --------------------
-  // Add task
-  // --------------------
+  // ---------------------------------
+  // ADD TASK
+  // ---------------------------------
   const addTask = async () => {
     if (!taskText || !date || !time) return;
 
-    const newTask = { text: taskText, date, time, priority };
+    const newTask = {
+      text: taskText,
+      date,
+      time,
+      priority,
+      notified: false,
+    };
 
-    const res = await fetch(`${API_BASE}/tasks`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newTask),
-    });
+    try {
+      const res = await fetch(`${API_BASE}/tasks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newTask),
+      });
 
-    const saved = await res.json();
-    setTasks(prev => [...prev, saved]);
-    scheduleNotification(saved);
+      const saved = await res.json();
+      setTasks((prev) => [...prev, saved]);
+    } catch (err) {
+      console.error(err);
+    }
 
     setTaskText("");
     setDate("");
@@ -83,37 +108,46 @@ function App() {
     setPriority("low");
   };
 
-  // --------------------
-  // Delete task
-  // --------------------
-  const deleteTask = async (id, notifyBackend = true) => {
-    if (notifyBackend) {
+  // ---------------------------------
+  // DELETE TASK
+  // ---------------------------------
+  const deleteTask = async (id) => {
+    try {
       await fetch(`${API_BASE}/tasks/${id}`, { method: "DELETE" });
-    }
-    setTasks(prev => prev.filter(t => t.id !== id));
+    } catch { }
+
+    setTasks((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // --------------------
-  // Save edited task
-  // --------------------
-  const saveEdit = async (updated) => {
-    await fetch(`${API_BASE}/tasks/${updated.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updated),
-    });
+  // ---------------------------------
+  // FULL EDIT (name/date/time/priority)
+  // ---------------------------------
+  const editTask = async (task) => {
+    const text = prompt("Task name:", task.text);
+    const date = prompt("Date (YYYY-MM-DD):", task.date);
+    const time = prompt("Time (HH:MM):", task.time);
+    const priority = prompt("Priority (low/medium/high):", task.priority);
 
-    setTasks(prev =>
-      prev.map(t => (t.id === updated.id ? updated : t))
+    if (!text || !date || !time || !priority) return;
+
+    const updated = { ...task, text, date, time, priority };
+
+    try {
+      await fetch(`${API_BASE}/tasks/${task.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated),
+      });
+    } catch { }
+
+    setTasks((prev) =>
+      prev.map((t) => (t.id === task.id ? updated : t))
     );
-
-    scheduleNotification(updated);
-    setEditingTask(null);
   };
 
-  // --------------------
+  // ---------------------------------
   // UI
-  // --------------------
+  // ---------------------------------
   return (
     <div className="page">
       <div className="app-container">
@@ -123,12 +157,11 @@ function App() {
           <input
             placeholder="Task name"
             value={taskText}
-            onChange={e => setTaskText(e.target.value)}
+            onChange={(e) => setTaskText(e.target.value)}
           />
-          <input type="date" value={date} onChange={e => setDate(e.target.value)} />
-          <input type="time" value={time} onChange={e => setTime(e.target.value)} />
-
-          <select value={priority} onChange={e => setPriority(e.target.value)}>
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+          <select value={priority} onChange={(e) => setPriority(e.target.value)}>
             <option value="low">Low</option>
             <option value="medium">Medium</option>
             <option value="high">High</option>
@@ -138,13 +171,13 @@ function App() {
         </div>
 
         <div className="task-list">
-          {tasks.map(task => (
+          {tasks.map((task) => (
             <div key={task.id} className={`task ${task.priority}`}>
               <strong>{task.text}</strong>
               <div>{task.date} at {task.time}</div>
 
               <div className="task-actions">
-                <button onClick={() => setEditingTask(task)}>✏️ Edit</button>
+                <button onClick={() => editTask(task)}>✏️ Edit</button>
                 <button onClick={() => deleteTask(task.id)}>🗑 Delete</button>
               </div>
             </div>
@@ -153,17 +186,8 @@ function App() {
 
         <Calendar tasks={tasks} />
       </div>
-
-      {editingTask && (
-        <EditModal
-          task={editingTask}
-          onSave={saveEdit}
-          onClose={() => setEditingTask(null)}
-        />
-      )}
     </div>
   );
 }
 
 export default App;
-
