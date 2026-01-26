@@ -43,13 +43,14 @@ function App() {
       tasks.forEach((task) => {
         if (task.notified) return;
 
-        const notifyAt = new Date(`${task.date}T${task.time}`).getTime();
+        const notifyAt = new Date(`${task.date}T${task.time}:00`).getTime();
+
 
         if (notifyAt <= now) {
           fireNotification(task);
         }
       });
-    }, 30000); // 30s
+    }, 5000); // 5s
 
     return () => clearInterval(interval);
   }, [tasks]);
@@ -64,16 +65,17 @@ function App() {
       body: `${task.text} (${task.priority.toUpperCase()})`,
     });
 
-    // mark notified in backend
+    task.notified = true;
+
     try {
       await fetch(`${API_BASE}/tasks/${task.id}/notified`, {
         method: "PUT",
       });
     } catch { }
 
-    // auto delete after notify
     deleteTask(task.id);
   };
+
 
   // ---------------------------------
   // ADD TASK
