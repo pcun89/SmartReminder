@@ -1,25 +1,40 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from typing import List
 
 app = FastAPI()
 
+# --------------------
+# CORS
+# --------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # tighten later
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-tasks = []
+# --------------------
+# In-memory storage
+# --------------------
+tasks: List[dict] = []
+
+# --------------------
+# Health check
+# --------------------
 
 
 @app.get("/")
 def root():
     return {
-        "message": "SmartReminder API is running",
+        "message": "SmartReminder API running",
         "docs": "/docs"
     }
+
+# --------------------
+# CRUD
+# --------------------
 
 
 @app.get("/tasks")
@@ -29,6 +44,7 @@ def get_tasks():
 
 @app.post("/tasks")
 def add_task(task: dict):
+    task["id"] = int(task.get("id") or len(tasks) + 1)
     tasks.append(task)
     return task
 
