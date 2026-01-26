@@ -1,63 +1,38 @@
-# SmartReminder 
+# SmartReminder
 
-SmartReminder is a full-stack reminder and task management web application that allows users to schedule reminders, assign urgency levels, view tasks on a calendar, and receive browser notifications.
+SmartReminder is a full-stack reminder application that allows users to schedule tasks with priority levels and receive browser notifications at the scheduled time.
 
-## 🚀 Live Demo
+## Features
+- Create, edit, and delete reminders
+- Set date, time, and urgency level
+- Browser notifications (active tab only)
+- Auto-delete reminders after notification
+- Calendar overview
+- Deployed frontend + backend
+
+## Tech Stack
+- Frontend: React, Vite
+- Backend: FastAPI
+- Deployment: Google Cloud Run, GitHub Pages
+- Notifications: Web Notifications API
+
+## Live Demo
 Frontend: https://pcun89.github.io/SmartReminder  
-Backend API: https://smartreminder-api-1097000065598.us-central1.run.app
+Backend: Google Cloud Run
 
----
-
-## 🛠 Tech Stack
-
-### Frontend
-- React (Vite)
-- JavaScript (ES6+)
-- HTML & CSS
-- Browser Notifications API
-- GitHub Pages (deployment)
-
-### Backend
-- Python
-- FastAPI
-- SQLite
-- SQLAlchemy
-- Google Cloud Run (Dockerized deployment)
-
----
-
-## ✨ Features
-
-- Add, edit, and delete reminders
-- Assign urgency levels (Low / Medium / High)
-- Color-coded task display
-- Calendar view of scheduled activities
-- Browser notifications at scheduled time
-- Persistent backend storage
-- Production-deployed frontend and backend
-
----
-
-## 🧠 Architecture
-
-React Frontend (GitHub Pages)
-↓ REST API
-FastAPI Backend (Cloud Run)
-↓
-SQLite Database
-
-yaml
-Copy code
-
----
-
-## 📦 Running Locally
+## Run Locally
 
 ### Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
+
+### Backend
+```bash
+cd backend
+uvicorn main:app --reload
+
 
 ## 👨‍💻 Author
 
